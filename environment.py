@@ -81,7 +81,17 @@ class WarehouseEnv:
         return self.get_observation()
     
     def get_observation(self):
-        pass
+        grid = np.stack(self.layers, axis=0) # [3, 10, 10] shape
+
+        observation = {
+            "grid": grid,
+            "inventory": self.robot_inventory,
+            "current_order": self.current_order,
+            "container": self.container_contents,
+            "progress": self.step_count / self.max_steps   
+        }
+
+        return observation
 
     def update_layers(self):
         # Reset layers
@@ -155,7 +165,7 @@ class WarehouseEnv:
 
                 # check if the robot can carry the requested quantity
                 if self.robot_inventory[item_type] + quantity <= 10:
-                    if shelf[item_type] >= quantity:
+                    if shelf["count"] >= quantity:
                         # check if the pickup is beneficial for the current order
                         if self.robot_inventory[item_type] < self.current_order[item_type]:
                             self.robot_inventory[item_type] += quantity
@@ -209,3 +219,6 @@ class WarehouseEnv:
         self.print_layers()   
 
         return self.get_observation(), reward, self.step_count >= self.max_steps
+    
+    def set_robot_position(self, new_position):
+        self.robot_pos = new_position
