@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from warehouse_env import WarehouseEnv
 
-env = WarehouseEnv(grid_size=(8, 8), num_shelf_types=3, num_shelves=3)
+env = WarehouseEnv(grid_size=(5, 5), num_shelf_types=2, num_shelves=2)
 
 def encode_state(obs):
     # Get robot position
@@ -47,9 +47,9 @@ gamma = 0.95
 epsilon = 1.0
 epsilon_decay = 0.9999
 min_epsilon = 0.1
-num_episodes = 10000 
+num_episodes = 1000 
 
-display_interval = 1000
+display_interval = 100
 
 Q = {}
 total_rewards = []
