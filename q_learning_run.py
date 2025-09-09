@@ -114,5 +114,5 @@ plt.tight_layout()
 plt.show()        
 
 # Save the trained agent
-agent.save("trained_q_agent.pt")
+agent.save("saved_models/trained_q_agent.pt")
 print("Agent saved to trained_q_agent.pt")
