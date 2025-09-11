@@ -1,10 +1,41 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from environment.warehouse_env import WarehouseEnv
-from agents.q_learning_agent import QLearningAgent
+from agents.deep_q_learning_agent import DoubleDQNAgent
+import torch
 
 env = WarehouseEnv(grid_size=(5, 5), num_shelf_types=2, num_shelves=2)
-agent = QLearningAgent(env)
+
+sample_obs, _ = env.reset()
+flat_state = np.concatenate([
+    sample_obs["layers"].flatten(),
+    sample_obs["robot_inventory"],
+    sample_obs["current_order"],
+    sample_obs["container_contents"]
+])
+state_dim = len(flat_state)
+
+agent = DoubleDQNAgent(
+    state_dim=state_dim,
+    num_item_types=env.num_shelf_types,
+    replay_buffer_size=10000,
+    batch_size=64,
+    gamma=0.99,
+    alpha=0.001,
+    epsilon=1.0,
+    epsilon_decay=0.995,
+    min_epsilon=0.1,
+    target_update=10,
+    hidden_dim=16
+)
+
+def encode_state(obs):
+    return np.concatenate([
+        obs["layers"].flatten(),
+        obs["robot_inventory"],
+        obs["current_order"],
+        obs["container_contents"]
+    ]).astype(np.float32)
 
 num_episodes = 1000
 display_interval = 100
@@ -17,11 +48,11 @@ completion_count = 0
 action_counts = np.zeros(env.action_space.n)
 action_history = []
 
-for episode in range(num_episodes):    
+for episode in range(num_episodes):
     observation, _ = env.reset()
     env._reset_info()
 
-    state = agent.encode_state(observation)
+    state = encode_state(observation)
     done = False
     episode_reward = 0
 
@@ -30,29 +61,32 @@ for episode in range(num_episodes):
         action_counts[action] += 1
 
         next_obs, reward, done, info = env.step(action)
-        next_state = agent.encode_state(next_obs)
+        next_state = encode_state(next_obs)
 
-        agent.learn(state, action, reward, next_state, done)
+        agent.store_transition(state, action, reward, next_state, done)
+
+        agent.learn()
 
         state = next_state
         episode_reward += reward
+    
+    agent.decay_epsilon()
 
     if episode % 100 == 99:
         action_distribution = action_counts / np.sum(action_counts)
         action_history.append(action_distribution.copy())
-    
-    episode_reason = info["episode_reason"]
+
     if info["episode_reason"] == "timeout":
         timeout_count += 1
     elif info["episode_reason"] == "order_completed":
         completion_count += 1
-
-    timeouts.append(timeout_count)        
-    completions.append(completion_count)    
+    
+    timeouts.append(timeout_count)
+    completions.append(completion_count)
     total_rewards.append(episode_reward)
     
-    if episode % display_interval == 0:        
-        print(f"Episode: {episode:4d} | Reward: {episode_reward:6.1f} | Orders completed: {completion_count:4d} | Timeouts: {timeout_count:4d} | Epsilon: {agent.epsilon:.3f}")
+    if episode % display_interval == 0:
+        print(f"Episode: {episode:4d} | Reward: {episode_reward:6.1f} | Orders completed: {completion_count:4d} | Timeouts: {timeout_count:4d} | Epsilon: {agent.epsilon:.3f}")    
 
 plt.figure(figsize=(15, 10))
 
@@ -77,7 +111,7 @@ plt.ylabel('Count')
 plt.title('Cumulative Episode Outcomes')
 plt.legend()
 
-# Plot 3: Completion Rate (completed/(completed+timeouts))
+# Plot 3: Completion Rate
 plt.subplot(2, 2, 3)
 completion_rates = []
 for i in range(len(completions)):
@@ -112,7 +146,3 @@ if action_history:
 
 plt.tight_layout()
 plt.show()        
-
-# Save the trained agent
-agent.save("saved_models/trained_q_agent.pt")
-print("Agent saved to trained_q_agent.pt")
