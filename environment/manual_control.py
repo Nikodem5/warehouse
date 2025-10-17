@@ -33,7 +33,7 @@ def render_map(env):
         print(" ".join(row))
 
 def main():
-    env = WarehouseEnv(grid_size=(5, 5), num_shelf_types=1, num_shelves=3)
+    env = WarehouseEnv(grid_size=(5, 5), num_shelf_types=2, num_shelves=1)
     obs, _ = env.reset()
     env.last_reward = 0  # Initialize last reward
     total_reward = 0  # Initialize total reward

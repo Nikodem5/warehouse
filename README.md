@@ -32,6 +32,10 @@ By comparing different reinforcement learning approaches, this project demonstra
 - Integration with more complex warehouse simulations
 - Real-time visualization of agent learning and performance
 
+## Results
+
+Example results are QLearning and DoubleQLearning agents trained on 5x5 grid warehouse with two types of items. The result graphs are shown below: 
+
 ## Installation
 
 ```bash
