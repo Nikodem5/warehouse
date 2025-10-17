@@ -1,6 +1,5 @@
 # Warehouse Reinforcement Learning
 
-
 ## Overview
 This project implements reinforcement learning algorithms to optimize warehouse operations through intelligent agent-based decision making. The simulation environment models a warehouse where agents must navigate, pick up items, and deliver them efficiently while avoiding obstacles and minimizing time/energy costs.
 
@@ -34,7 +33,16 @@ By comparing different reinforcement learning approaches, this project demonstra
 
 ## Results
 
-Example results are QLearning and DoubleQLearning agents trained on 5x5 grid warehouse with two types of items. The result graphs are shown below: 
+Example results are QLearning and DoubleDQLearning agents trained on 5x5 grid warehouse with two types of items. The result graphs are shown below: 
+
+QLearning Agent
+![Alt text](./results/Figure_1.png)
+
+DoubleDQLearning
+![Alt text](./results/Figure_2.png)
+
+QLearning agent performs well in small and simple environments and encounters difficulties in larger warehouses.
+DoubleDQLearning agent is more suitable for larger environments and slower epsilon decay.
 
 ## Installation
 
